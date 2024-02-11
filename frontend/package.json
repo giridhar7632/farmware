@@ -1,5 +1,5 @@
 {
-  "name": "dev-week",
+  "name": "farmware",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,17 +11,10 @@
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.7.1",
-    "@tanstack/react-query": "^4.36.1",
-    "@trpc/client": "^10.43.6",
-    "@trpc/next": "^10.43.6",
-    "@trpc/react-query": "^10.43.6",
-    "@trpc/server": "^10.43.6",
     "convex": "^1.9.0",
     "next": "^14.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "server-only": "^0.0.1",
-    "superjson": "^2.2.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -43,5 +36,5 @@
   "ct3aMetadata": {
     "initVersion": "7.26.0"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@1.22.21"
 }
