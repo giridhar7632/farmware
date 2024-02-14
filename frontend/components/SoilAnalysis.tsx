@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
-import { Button } from "../_components/ui/button";
+import { Button } from "./ui/button";
 import { useState } from "react";
-import { Input } from "../_components/ui/input";
+import { Input } from "./ui/input";
 
 export default function SoilAnalysis() {
   const [coordinates, setCoordinates] = useState("");
