@@ -1,13 +1,11 @@
 import { Separator } from '@/components/ui/separator'
 import { SidebarNav } from '@/components/ui/sidebar-nav'
-import { redirect } from 'next/navigation'
-
 import { SimpleNav } from '@/components/Navbars'
 import { session } from '@descope/nextjs-sdk/server'
 
 const sidebarNavItems = [
   {
-    title: 'Analysis',
+    title: 'Analyse',
     href: '/app',
   },
   {
@@ -25,15 +23,10 @@ interface SettingsLayoutProps {
 }
 
 export default function AppLayout({ children }: SettingsLayoutProps) {
-  const sessionRes = session()
-  if (!sessionRes) {
-    redirect('/login')
-  }
-
   return (
     <>
       <SimpleNav />
-      <div className="hidden space-y-6 p-10 pb-16 md:block">
+      <div className="space-y-6 p-10 pb-16">
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">Hi There!</h2>
           <p className="text-muted-foreground">

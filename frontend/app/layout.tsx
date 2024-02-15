@@ -5,6 +5,7 @@ import Script from 'next/script'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@descope/nextjs-sdk'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/sonner'
 
 const roboto = Roboto({
   weight: ['400', '700', '900'],
@@ -31,6 +32,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster />
           </ThemeProvider>
           <Script src="bower_components/aos/dist/aos.js" />
         </body>

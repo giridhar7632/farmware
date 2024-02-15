@@ -1,17 +1,15 @@
 import { Separator } from '@/components/ui/separator'
-import { AnalyseForm } from './AnalyseForm'
 
-export default function AppAnalysisPage() {
+export default function AnalysisHistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Analyse</h3>
+        <h3 className="text-lg font-medium">History</h3>
         <p className="text-sm text-muted-foreground">
-          Get to know your form better{' '}
+          Here&apos;s a summary of your analysis history
         </p>
       </div>
       <Separator />
-      <AnalyseForm />
     </div>
   )
 }

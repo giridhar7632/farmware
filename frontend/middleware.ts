@@ -8,5 +8,5 @@ export default authMiddleware({
 })
 
 export const config = {
-  matcher: ['/app'],
+  matcher: ['/app', '/login'],
 }

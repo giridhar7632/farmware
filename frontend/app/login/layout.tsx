@@ -1,5 +1,7 @@
 import { type Metadata } from 'next'
 import { PaddingIcon } from '@radix-ui/react-icons'
+import { session } from '@descope/nextjs-sdk/server'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Farmware | Login',
@@ -10,11 +12,16 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
+  const sessionRes = session()
+  if (sessionRes) {
+    redirect('/app')
+  }
+
   return (
     <>
       <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
-          <div className="absolute inset-0 bg-zinc-900" />
+          <div className="absolute inset-0 bg-neutral-900" />
           <div className="relative z-20 flex items-center text-lg font-medium">
             <PaddingIcon className="mr-2 h-6 w-6" />
             Farmware

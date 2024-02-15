@@ -1,23 +1,15 @@
 'use client'
 
-import { useSession } from '@descope/nextjs-sdk/client'
 import { Descope } from '@descope/nextjs-sdk'
-import { redirect } from 'next/navigation'
+import { useTheme } from 'next-themes'
 
 export default function AuthPage() {
-  const { isAuthenticated, isSessionLoading } = useSession()
-
-  if (isSessionLoading) {
-    return <p>Loading...</p>
-  }
-
-  if (isAuthenticated) {
-    redirect('/app')
-  }
+  const { theme } = useTheme()
 
   return (
     <Descope
       flowId="sign-up-or-in"
+      theme={theme === 'system' ? 'os' : (theme as 'light' | 'dark')}
       redirectAfterSuccess="/app"
       redirectAfterError="/error-page"
     />

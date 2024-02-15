@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { Input } from "./ui/input";
+import Image from 'next/image'
+import { Input } from './ui/input'
 
 export default function Demo() {
   return (
@@ -31,7 +31,11 @@ export default function Demo() {
                 ></path>
               </g>
             </svg>
-            <Input value="34.665,31.625" disabled className="text-gray-900" />
+            <Input
+              value="34.665,31.625"
+              disabled
+              className="text-neutral-900"
+            />
           </div>
         </section>
         <section
@@ -39,17 +43,17 @@ export default function Demo() {
           data-aos="fade-up"
         >
           <h3 className="w-1/2 text-3xl">
-            Step 2: We will fetch the latest satellite imagery from{" "}
+            Step 2: We will fetch the latest satellite imagery from{' '}
             <a
               href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-2"
-              className="underline hover:text-gray-700"
+              className="underline hover:text-neutral-700"
             >
               sentinel-2
             </a>
             .
           </h3>
           <Image
-            src={"/sentinel-satellite.png"}
+            src={'/sentinel-satellite.png'}
             width={300}
             height={200}
             alt={`sentinel satellite image of request coordinates`}
@@ -90,5 +94,5 @@ export default function Demo() {
         </section>
       </article>
     </>
-  );
+  )
 }

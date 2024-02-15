@@ -1,16 +1,14 @@
 import Link from 'next/link'
 import { PaddingIcon } from '@radix-ui/react-icons'
-import { session } from '@descope/nextjs-sdk/server'
-import { Button } from './ui/button'
 import { ThemeToggle } from './theme-provider'
+import AuthButton from './AuthButton'
 
 export function PublicNav() {
-  const sessionRes = session()
   return (
     <header className="flex h-14 items-center px-4 lg:px-6">
       <Link className="flex items-center justify-center" href="#">
         <PaddingIcon className="h-6 w-6" />
-        <span className="sr-only">Farmware</span>
+        <span className="ml-2 hidden md:inline">Farmware</span>
       </Link>
       <nav className="ml-auto flex items-center gap-4 sm:gap-6">
         <Link
@@ -31,11 +29,8 @@ export function PublicNav() {
         >
           Contact
         </Link>
-        {!sessionRes ? (
-          <Button asChild>
-            <Link href={'/login'}>Login</Link>
-          </Button>
-        ) : null}
+        <ThemeToggle />
+        <AuthButton />
       </nav>
     </header>
   )
@@ -46,10 +41,11 @@ export function SimpleNav() {
     <header className="flex h-14 items-center px-4 lg:px-6">
       <Link className="flex items-center justify-center" href="#">
         <PaddingIcon className="h-6 w-6" />
-        <span className="sr-only">Farmware</span>
+        <span className="ml-2 hidden md:inline">Farmware</span>
       </Link>
       <div className="ml-auto flex items-center gap-4 sm:gap-6">
         <ThemeToggle />
+        <AuthButton />
       </div>
     </header>
   )
