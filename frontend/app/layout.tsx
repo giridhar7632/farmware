@@ -4,6 +4,7 @@ import { Roboto } from 'next/font/google'
 import Script from 'next/script'
 import type { Metadata } from 'next'
 import { AuthProvider } from '@descope/nextjs-sdk'
+import { ThemeProvider } from '@/components/theme-provider'
 
 const roboto = Roboto({
   weight: ['400', '700', '900'],
@@ -23,7 +24,14 @@ export default function RootLayout({
     <AuthProvider projectId={process.env.DESCOPE_PROJECT_ID ?? ''}>
       <html lang="en">
         <body className={`${roboto.className} min-h-screen`}>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
           <Script src="bower_components/aos/dist/aos.js" />
         </body>
       </html>
