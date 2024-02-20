@@ -106,7 +106,7 @@ export const AnalyseForm = () => {
             </Tooltip>
           </TooltipProvider>
         </div>
-        <Button type="submit">Analyse</Button>
+        <Button className='bg-blue-500 hover:bg-blue-600' type="submit">Analyse</Button>
       </form>
     </Form>
   )
