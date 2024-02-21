@@ -135,6 +135,8 @@ export const retrieveSatelliteImage = action({
         userID: args.userId,
         date: args.date,
       })
+      const imageUrl = await ctx.storage.getUrl(storageId)
+      return imageUrl
       //   const data = await ctx.runMutation(, {
       //     latitude: args.latitude,
       //     longitutude: args.longitude
