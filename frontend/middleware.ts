@@ -9,4 +9,8 @@ export default authMiddleware({
 
 export const config = {
   matcher: ['/app', '/login'],
+  runtime: 'experimental-edge', // for Edge API Routes only
+  unstable_allowDynamic: [
+    '/node_modules/lodash.get/index.js', // allows the lodash.get module
+  ],
 }
