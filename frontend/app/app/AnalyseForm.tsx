@@ -93,7 +93,6 @@ export const AnalyseForm = () => {
     form.setValue('timeRangeFrom', newTimeRangeFrom)
     form.setValue('timeRangeTo', newTimeRangeTo)
 
-    console.log({ newTimeRangeFrom, newTimeRangeTo })
     const imagePromise = performRetrieveSatelliteImage({
       longitude: form.getValues('lon'),
       latitude: form.getValues('lat'),

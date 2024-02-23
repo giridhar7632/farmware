@@ -1,13 +1,29 @@
 import { v } from 'convex/values'
 import {
-  mutation,
   action,
   internalMutation,
   internalQuery,
+  query,
 } from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
 import { internal } from './_generated/api'
 import { RegisteredAction } from 'convex/server'
+
+export const getImagesByUser = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const images = await ctx.db
+      .query('satellite_images')
+      .filter((q) => q.eq(q.field('userID'), args.userId))
+      .collect()
+    return Promise.all(
+      images.map(async (image) => ({
+        ...image,
+        url: await ctx.storage.getUrl(image.image),
+      })),
+    )
+  },
+})
 
 export const getImageByInfo = internalQuery({
   args: {
