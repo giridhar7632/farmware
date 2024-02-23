@@ -15,14 +15,16 @@ export const generateUploadUrl = mutation({
 export const saveImage = internalMutation({
   args: {
     userID: v.string(),
-    date: v.string(),
+    timeRangeFrom: v.string(),
+    timeRangeTo: v.string(),
     storageId: v.string(),
   },
   handler: async (ctx, args) => {
     // use `args` and/or `ctx.auth` to authorize the user
     ctx.db.insert('satellite_images', {
       userID: args.userID,
-      date: args.date,
+      timeRangeFrom: args.timeRangeFrom,
+      timeRangeTo: args.timeRangeTo,
       image: args.storageId,
     })
   },
@@ -33,15 +35,18 @@ export const retrieveSatelliteImage = action({
     latitude: v.string(),
     longitude: v.string(),
     userId: v.string(),
-    date: v.string(),
+    timeRangeFrom: v.string(),
+    timeRangeTo: v.string(),
   },
   handler: async (ctx, args) => {
     // const testArgs = {
     //   latitude: '43.5639',
     //   longitude: '-79.7172',
     //   userId: 'user',
-    //   date: '2024-02-20',
+    //   timeRangeFrom: '2022-05-01T00:00:00Z',
+    //   timeRangeTo: '2022-05-15T00:00:00Z',
     // }
+
     // const bbox = [-79.8172, 43.4639, -79.9172, 43.6639]
     try {
       const lat = parseFloat(args.latitude)
@@ -94,8 +99,8 @@ export const retrieveSatelliteImage = action({
                   type: 'sentinel-2-l2a',
                   dataFilter: {
                     timeRange: {
-                      from: '2022-05-01T00:00:00Z',
-                      to: '2022-05-15T00:00:00Z',
+                      from: args.timeRangeFrom,
+                      to: args.timeRangeTo,
                     },
                   },
                 },
@@ -133,7 +138,8 @@ export const retrieveSatelliteImage = action({
       await ctx.runMutation(internal.satelliteImage.saveImage, {
         storageId,
         userID: args.userId,
-        date: args.date,
+        timeRangeFrom: args.timeRangeFrom,
+        timeRangeTo: args.timeRangeTo,
       })
       const imageUrl = await ctx.storage.getUrl(storageId)
       return imageUrl

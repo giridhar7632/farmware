@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useAction } from 'convex/react'
@@ -21,6 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -32,21 +33,25 @@ import { useUser } from '@descope/react-sdk'
 const formSchema = z.object({
   lat: z.string().max(10),
   lon: z.string().max(10),
+  timeRangeFrom: z.string(),
+  timeRangeTo: z.string(),
 })
 
 export const AnalyseForm = () => {
   const { user } = useUser()
-  console.log(user)
   const [loading, setLoading] = useState<boolean>(false)
   const performRetrieveSatelliteImage = useAction(
     api.satelliteImage.retrieveSatelliteImage,
   )
   const [satelliteImage, setSatelliteImage] = useState('')
+  const [isLoaded, setIsLoaded] = useState(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       lat: '',
       lon: '',
+      timeRangeFrom: '2022-05-01T00:00:00Z',
+      timeRangeTo: '2022-05-15T00:00:00Z',
     },
   })
 
@@ -55,18 +60,32 @@ export const AnalyseForm = () => {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast.message('analysing...')
-    const imageUrl = await performRetrieveSatelliteImage({
+    if (isLoaded) {
+      setIsLoaded(false)
+    }
+    const creationPromise = performRetrieveSatelliteImage({
       longitude: values.lon,
       latitude: values.lat,
       userId: user.userId,
-      date: new Date().toISOString(),
+      timeRangeFrom: values.timeRangeFrom,
+      timeRangeTo: values.timeRangeTo,
     })
-    if (imageUrl) {
-      setSatelliteImage(imageUrl)
-      console.log({ imageUrl })
-    }
+      .then((imageUrl: string | null) => {
+        if (imageUrl) {
+          setSatelliteImage(imageUrl)
+          return imageUrl
+        } else {
+          throw new Error('No image URL returned')
+        }
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+    toast.promise(creationPromise, {
+      loading: 'Analyzing...',
+      success: 'Analysis successful.',
+      error: 'Error fetching image. Please try again later or contact admin',
+    })
   }
 
   function onLocate() {
@@ -142,12 +161,17 @@ export const AnalyseForm = () => {
         </form>
       </Form>
       {satelliteImage && (
-        <Image
-          src={satelliteImage}
-          height={300}
-          width={300}
-          alt="satellite image for requested location"
-        />
+        <>
+          {!isLoaded && <Skeleton className="h-[500px] w-[500px]" />}
+          <Image
+            onLoad={() => setIsLoaded(true)}
+            src={satelliteImage}
+            height={500}
+            width={500}
+            className="rounded-sm"
+            alt="satellite image for requested location"
+          />
+        </>
       )}
     </>
   )
