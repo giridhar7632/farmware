@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useAction } from 'convex/react'
+import { useAction } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -122,6 +123,8 @@ export const AnalyseForm = () => {
     setLoading(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        form.setValue('lat', pos.coords.latitude.toFixed(4).toString())
+        form.setValue('lon', pos.coords.longitude.toFixed(4).toString())
         form.setValue('lat', pos.coords.latitude.toFixed(4).toString())
         form.setValue('lon', pos.coords.longitude.toFixed(4).toString())
         setLoading(false)
