@@ -2,7 +2,7 @@
 import { Separator } from '@/components/ui/separator'
 import { api } from '@/convex/_generated/api'
 import { useUser } from '@descope/react-sdk'
-import { useQuery } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import {
   Table,
   TableBody,
@@ -12,12 +12,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Id } from '@/convex/_generated/dataModel'
+import { Button } from '@/components/ui/button'
 
 export default function AnalysisHistoryPage() {
   const { user } = useUser()
   const images = useQuery(api.satelliteImage.getImagesByUser, {
     userId: user?.userId || '',
   })
+
+  const deleteImage = useMutation(api.satelliteImage.deleteImage)
+
+  const handleDelete = ({
+    imageId,
+    storageId,
+  }: {
+    imageId: Id<'satellite_images'>
+    storageId: Id<'_storage'>
+  }) => {
+    deleteImage({ imageId, storageId })
+  }
 
   if (!user) {
     return null
@@ -39,7 +53,7 @@ export default function AnalysisHistoryPage() {
             <TableHead className="w-[100px]">Longitude</TableHead>
             <TableHead>Latitude</TableHead>
             <TableHead>Time Range</TableHead>
-            <TableHead className="text-right">Image</TableHead>
+            <TableHead>Image</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -52,8 +66,25 @@ export default function AnalysisHistoryPage() {
                   {image.timeRangeFrom.split('T')[0]} -{' '}
                   {image.timeRangeTo.split('T')[0]}
                 </TableCell>
-                <TableCell className="text-right">
-                  {image.url && <a href={image.url}>View</a>}
+                <TableCell>
+                  {image.url && (
+                    <div className="flex gap-2">
+                      <Button>
+                        <a href={image.url}>View</a>
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          handleDelete({
+                            imageId: image._id,
+                            storageId: image.image,
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

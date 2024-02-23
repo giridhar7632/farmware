@@ -3,6 +3,7 @@ import {
   action,
   internalMutation,
   internalQuery,
+  mutation,
   query,
 } from './_generated/server'
 import { Doc, Id } from './_generated/dataModel'
@@ -22,6 +23,14 @@ export const getImagesByUser = query({
         url: await ctx.storage.getUrl(image.image),
       })),
     )
+  },
+})
+
+export const deleteImage = mutation({
+  args: { imageId: v.id('satellite_images'), storageId: v.id('_storage') },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.imageId)
+    await ctx.storage.delete(args.storageId)
   },
 })
 
