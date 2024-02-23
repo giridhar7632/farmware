@@ -44,14 +44,14 @@ export const AnalyseForm = () => {
     api.satelliteImage.retrieveSatelliteImage,
   )
   const [satelliteImage, setSatelliteImage] = useState('')
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       lat: '',
       lon: '',
-      timeRangeFrom: '2022-05-01T00:00:00Z',
-      timeRangeTo: '2022-05-15T00:00:00Z',
+      timeRangeFrom: '2023-05-01T00:00:00Z',
+      timeRangeTo: '2023-05-6T00:00:00Z',
     },
   })
 
@@ -60,9 +60,6 @@ export const AnalyseForm = () => {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (isLoaded) {
-      setIsLoaded(false)
-    }
     const creationPromise = performRetrieveSatelliteImage({
       longitude: values.lon,
       latitude: values.lat,
@@ -87,6 +84,9 @@ export const AnalyseForm = () => {
       error: 'Error fetching image. Please try again later or contact admin',
     })
   }
+
+  async function handleViewLater() {}
+  async function handleViewEarlier() {}
 
   function onLocate() {
     setLoading(true)
@@ -160,18 +160,27 @@ export const AnalyseForm = () => {
           </Button>
         </form>
       </Form>
+
       {satelliteImage && (
-        <>
-          {!isLoaded && <Skeleton className="h-[500px] w-[500px]" />}
-          <Image
-            onLoad={() => setIsLoaded(true)}
-            src={satelliteImage}
-            height={500}
-            width={500}
-            className="rounded-sm"
-            alt="satellite image for requested location"
-          />
-        </>
+        <div>
+          {!isImageLoaded && <Skeleton className="h-[500px] w-[500px]" />}
+          <div className="flex items-center gap-2">
+            <Image
+              onLoad={() => setIsImageLoaded(true)}
+              src={satelliteImage}
+              height={500}
+              width={500}
+              className="rounded-sm"
+              alt="satellite image for requested location"
+            />
+            {isImageLoaded && (
+              <div className="flex flex-col gap-4">
+                <Button>&lt;&lt; 5 days earlier</Button>
+                <Button>&gt;&gt; 5 days later</Button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </>
   )
