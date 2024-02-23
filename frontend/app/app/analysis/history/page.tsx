@@ -62,7 +62,7 @@ export default function AnalysisHistoryPage() {
                 <TableCell className="font-medium">{image.longitude}</TableCell>
                 <TableCell>{image.latitude}</TableCell>
                 <TableCell>
-                  {image.timeRangeFrom.split('T')[0]} -{' '}
+                  {image.timeRangeFrom.split('T')[0]} to{' '}
                   {image.timeRangeTo.split('T')[0]}
                 </TableCell>
                 <TableCell>

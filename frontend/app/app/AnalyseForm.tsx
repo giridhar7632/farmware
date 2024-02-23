@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useAction } from 'convex/react'
-import { useAction } from 'convex/react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -201,7 +200,7 @@ export const AnalyseForm = () => {
       {satelliteImage && (
         <div>
           {!isImageLoaded && <Skeleton className="h-[500px] w-[500px]" />}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
             <Image
               onLoad={() => setIsImageLoaded(true)}
               src={satelliteImage}
@@ -211,7 +210,7 @@ export const AnalyseForm = () => {
               alt="satellite image for requested location"
             />
             {isImageLoaded && (
-              <div className="flex flex-col gap-4">
+              <div className="flex gap-4 md:flex-col">
                 <Button onClick={() => handleFetchDiffDate(-5)}>
                   &lt;&lt; 5 days earlier
                 </Button>
