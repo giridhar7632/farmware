@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { useAction } from 'convex/react'
@@ -29,6 +29,7 @@ import { Loader2Icon, LocateIcon } from 'lucide-react'
 import { api } from '@/convex/_generated/api'
 import Image from 'next/image'
 import { useUser } from '@descope/react-sdk'
+import { addDays, isDateInFuture } from '@/lib/date'
 
 const formSchema = z.object({
   lat: z.string().max(10),
@@ -50,8 +51,8 @@ export const AnalyseForm = () => {
     defaultValues: {
       lat: '',
       lon: '',
-      timeRangeFrom: '2023-05-01T00:00:00Z',
-      timeRangeTo: '2023-05-6T00:00:00Z',
+      timeRangeFrom: '2024-01-01T00:00:00Z',
+      timeRangeTo: '2024-01-06T00:00:00Z',
     },
   })
 
@@ -60,7 +61,7 @@ export const AnalyseForm = () => {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const creationPromise = performRetrieveSatelliteImage({
+    const imagePromise = performRetrieveSatelliteImage({
       longitude: values.lon,
       latitude: values.lat,
       userId: user.userId,
@@ -78,15 +79,45 @@ export const AnalyseForm = () => {
       .catch((error) => {
         throw new Error(error)
       })
-    toast.promise(creationPromise, {
+    toast.promise(imagePromise, {
       loading: 'Analyzing...',
       success: 'Analysis successful.',
       error: 'Error fetching image. Please try again later or contact admin',
     })
   }
 
-  async function handleViewLater() {}
-  async function handleViewEarlier() {}
+  async function handleFetchDiffDate(days: number) {
+    const newTimeRangeFrom = addDays(form.getValues('timeRangeFrom'), days)
+    const newTimeRangeTo = addDays(form.getValues('timeRangeTo'), days)
+
+    form.setValue('timeRangeFrom', newTimeRangeFrom)
+    form.setValue('timeRangeTo', newTimeRangeTo)
+
+    console.log({ newTimeRangeFrom, newTimeRangeTo })
+    const imagePromise = performRetrieveSatelliteImage({
+      longitude: form.getValues('lon'),
+      latitude: form.getValues('lat'),
+      userId: user.userId,
+      timeRangeFrom: newTimeRangeFrom,
+      timeRangeTo: newTimeRangeTo,
+    })
+      .then((imageUrl: string | null) => {
+        if (imageUrl) {
+          setSatelliteImage(imageUrl)
+          return imageUrl
+        } else {
+          throw new Error('No image URL returned')
+        }
+      })
+      .catch((error) => {
+        throw new Error(error)
+      })
+    toast.promise(imagePromise, {
+      loading: 'Retrieving new image...',
+      success: 'Analysis successful.',
+      error: 'Error fetching image. Please try again later or contact admin',
+    })
+  }
 
   function onLocate() {
     setLoading(true)
@@ -155,6 +186,10 @@ export const AnalyseForm = () => {
               </Tooltip>
             </TooltipProvider>
           </div>
+          <p className="text-sm italic">
+            From {form.getValues('timeRangeFrom').split('T')[0]} to{' '}
+            {form.getValues('timeRangeTo').split('T')[0]}
+          </p>
           <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
             Analyse
           </Button>
@@ -175,8 +210,14 @@ export const AnalyseForm = () => {
             />
             {isImageLoaded && (
               <div className="flex flex-col gap-4">
-                <Button>&lt;&lt; 5 days earlier</Button>
-                <Button>&gt;&gt; 5 days later</Button>
+                <Button onClick={() => handleFetchDiffDate(-5)}>
+                  &lt;&lt; 5 days earlier
+                </Button>
+                {!isDateInFuture(form.getValues('timeRangeTo')) && (
+                  <Button onClick={() => handleFetchDiffDate(5)}>
+                    &gt;&gt; 5 days later
+                  </Button>
+                )}
               </div>
             )}
           </div>

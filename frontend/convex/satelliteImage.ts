@@ -11,7 +11,6 @@ import { RegisteredAction } from 'convex/server'
 
 export const getImageByInfo = internalQuery({
   args: {
-    userID: v.string(),
     timeRangeFrom: v.string(),
     timeRangeTo: v.string(),
     latitude: v.string(),
@@ -21,11 +20,10 @@ export const getImageByInfo = internalQuery({
     // use `args` and/or `ctx.auth` to authorize the user
     const image = await ctx.db
       .query('satellite_images')
-      .filter((q) => q.eq(q.field('userID'), args.userID))
-      .filter((q) => q.eq(q.field('timeRangeFrom'), args.timeRangeFrom))
-      .filter((q) => q.eq(q.field('timeRangeTo'), args.timeRangeTo))
       .filter((q) => q.eq(q.field('latitude'), args.latitude))
       .filter((q) => q.eq(q.field('longitude'), args.longitude))
+      .filter((q) => q.eq(q.field('timeRangeFrom'), args.timeRangeFrom))
+      .filter((q) => q.eq(q.field('timeRangeTo'), args.timeRangeTo))
       .unique()
     return image
   },
@@ -84,7 +82,6 @@ export const retrieveSatelliteImage: RegisteredAction<
       const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
         internal.satelliteImage.getImageByInfo,
         {
-          userID: args.userId,
           timeRangeFrom: args.timeRangeFrom,
           timeRangeTo: args.timeRangeTo,
           latitude: args.latitude,
