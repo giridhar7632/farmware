@@ -37,7 +37,6 @@ export default function AnalysisHistoryPage() {
     return null
   }
 
-  console.log({ images })
   return (
     <div className="space-y-6">
       <div>
