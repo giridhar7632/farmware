@@ -28,8 +28,8 @@ import { Label } from '@/components/ui/label'
 import { Loader2Icon, LocateIcon } from 'lucide-react'
 import { api } from '@/convex/_generated/api'
 import Image from 'next/image'
-import { useUser } from '@descope/react-sdk'
 import { addDays, isDateInFuture } from '@/lib/date'
+import { useSession } from 'next-auth/react'
 
 const formSchema = z.object({
   lat: z.string().max(10),
@@ -39,7 +39,7 @@ const formSchema = z.object({
 })
 
 export const AnalyseForm = () => {
-  const { user } = useUser()
+  const { data: session } = useSession()
   const [loading, setLoading] = useState<boolean>(false)
   const performRetrieveSatelliteImage = useAction(
     api.satelliteImage.retrieveSatelliteImage,
@@ -56,7 +56,7 @@ export const AnalyseForm = () => {
     },
   })
 
-  if (user === undefined) {
+  if (session?.user === undefined) {
     return <Loader2Icon className="animate-spin" />
   }
 
@@ -64,7 +64,7 @@ export const AnalyseForm = () => {
     const imagePromise = performRetrieveSatelliteImage({
       longitude: values.lon,
       latitude: values.lat,
-      userId: user.userId,
+      userId: session?.user.id ?? '',
       timeRangeFrom: values.timeRangeFrom,
       timeRangeTo: values.timeRangeTo,
     })
@@ -76,8 +76,8 @@ export const AnalyseForm = () => {
           throw new Error('No image URL returned')
         }
       })
-      .catch((error) => {
-        throw new Error(error)
+      .catch((error: Error) => {
+        throw new Error(error.message)
       })
     toast.promise(imagePromise, {
       loading: 'Analyzing...',
@@ -96,7 +96,7 @@ export const AnalyseForm = () => {
     const imagePromise = performRetrieveSatelliteImage({
       longitude: form.getValues('lon'),
       latitude: form.getValues('lat'),
-      userId: user.userId,
+      userId: session?.user.id ?? '',
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
     })
@@ -108,8 +108,8 @@ export const AnalyseForm = () => {
           throw new Error('No image URL returned')
         }
       })
-      .catch((error) => {
-        throw new Error(error)
+      .catch((error: Error) => {
+        throw new Error(error.message)
       })
     toast.promise(imagePromise, {
       loading: 'Retrieving new image...',

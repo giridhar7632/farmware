@@ -1,22 +1,14 @@
-import { type Metadata } from 'next'
+import { auth } from '@/lib/auth'
 import { PaddingIcon } from '@radix-ui/react-icons'
-import { session } from '@descope/nextjs-sdk/server'
 import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = {
-  title: 'Farmware | Login',
-}
-
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const sessionRes = session()
-  if (sessionRes) {
-    redirect('/app')
-  }
-
+  const session = await auth()
+  if (session?.user) redirect('/dashboard')
   return (
     <>
       <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -36,10 +28,8 @@ export default function AuthLayout({
             </blockquote>
           </div>
         </div>
-        <div className="lg:p-8">
-          <div className="mx-auto flex w-full max-w-lg flex-col justify-center space-y-6">
-            {children}
-          </div>
+        <div className="mx-auto flex w-full max-w-96 flex-col justify-center space-y-6">
+          {children}
         </div>
       </div>
     </>

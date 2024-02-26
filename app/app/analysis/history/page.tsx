@@ -1,39 +1,39 @@
 'use client'
+
 import { Separator } from '@/components/ui/separator'
 import { api } from '@/convex/_generated/api'
-import { useUser } from '@descope/react-sdk'
 import { useMutation, useQuery } from 'convex/react'
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Id } from '@/convex/_generated/dataModel'
+import { type Id } from '@/convex/_generated/dataModel'
 import { Button } from '@/components/ui/button'
+import { useSession } from 'next-auth/react'
 
 export default function AnalysisHistoryPage() {
-  const { user } = useUser()
+  const { data: session } = useSession()
   const images = useQuery(api.satelliteImage.getImagesByUser, {
-    userId: user?.userId || '',
+    userId: session?.user.id ?? '',
   })
 
   const deleteImage = useMutation(api.satelliteImage.deleteImage)
 
-  const handleDelete = ({
+  const handleDelete = async ({
     imageId,
     storageId,
   }: {
     imageId: Id<'satellite_images'>
     storageId: Id<'_storage'>
   }) => {
-    deleteImage({ imageId, storageId })
+    await deleteImage({ imageId, storageId })
   }
 
-  if (!user) {
+  if (!session) {
     return null
   }
 
@@ -56,37 +56,36 @@ export default function AnalysisHistoryPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {images &&
-            images.map((image) => (
-              <TableRow key={image._id}>
-                <TableCell className="font-medium">{image.longitude}</TableCell>
-                <TableCell>{image.latitude}</TableCell>
-                <TableCell>
-                  {image.timeRangeFrom.split('T')[0]} to{' '}
-                  {image.timeRangeTo.split('T')[0]}
-                </TableCell>
-                <TableCell>
-                  {image.url && (
-                    <div className="flex gap-2">
-                      <Button>
-                        <a href={image.url}>View</a>
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() =>
-                          handleDelete({
-                            imageId: image._id,
-                            storageId: image.image,
-                          })
-                        }
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+          {images?.map((image) => (
+            <TableRow key={image._id}>
+              <TableCell className="font-medium">{image.longitude}</TableCell>
+              <TableCell>{image.latitude}</TableCell>
+              <TableCell>
+                {image.timeRangeFrom.split('T')[0]} to{' '}
+                {image.timeRangeTo.split('T')[0]}
+              </TableCell>
+              <TableCell>
+                {image.url && (
+                  <div className="flex gap-2">
+                    <Button>
+                      <a href={image.url}>View</a>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() =>
+                        handleDelete({
+                          imageId: image._id,
+                          storageId: image.image,
+                        })
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

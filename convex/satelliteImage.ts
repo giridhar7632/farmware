@@ -6,9 +6,9 @@ import {
   mutation,
   query,
 } from './_generated/server'
-import { Doc, Id } from './_generated/dataModel'
+import { type Doc, type Id } from './_generated/dataModel'
 import { internal } from './_generated/api'
-import { RegisteredAction } from 'convex/server'
+import { type RegisteredAction } from 'convex/server'
 
 export const getImagesByUser = query({
   args: { userId: v.string() },
@@ -64,7 +64,7 @@ export const saveImage = internalMutation({
     longitude: v.string(),
   },
   handler: async (ctx, args) => {
-    ctx.db.insert('satellite_images', {
+    await ctx.db.insert('satellite_images', {
       userID: args.userID,
       timeRangeFrom: args.timeRangeFrom,
       timeRangeTo: args.timeRangeTo,
@@ -136,8 +136,8 @@ export const retrieveSatelliteImage: RegisteredAction<
           },
           body: new URLSearchParams({
             grant_type: 'client_credentials',
-            client_id: process.env.CLIENT_ID as string,
-            client_secret: process.env.CLIENT_SECRET as string,
+            client_id: process.env.CLIENT_ID!,
+            client_secret: process.env.CLIENT_SECRET!,
           }),
         },
       )
