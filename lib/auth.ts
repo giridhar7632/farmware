@@ -1,8 +1,8 @@
 import NextAuth, { type NextAuthConfig } from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import Google from 'next-auth/providers/google'
-import Email, { type NodemailerConfig } from 'next-auth/providers/nodemailer'
-import { sendVerificationRequest } from './sendVerificationRequest'
+// import Email, { type NodemailerConfig } from 'next-auth/providers/nodemailer'
+// import { sendVerificationRequest } from './sendVerificationRequest'
 
 export const authOptions: NextAuthConfig = {
   providers: [

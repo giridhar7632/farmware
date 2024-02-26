@@ -1,7 +1,8 @@
 import { Separator } from '@/components/ui/separator'
 import { SidebarNav } from '@/components/ui/sidebar-nav'
 import { SimpleNav } from '@/components/Navbars'
-import { session } from '@descope/nextjs-sdk/server'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
 const sidebarNavItems = [
   {
@@ -22,7 +23,12 @@ interface SettingsLayoutProps {
   children: React.ReactNode
 }
 
-export default function AppLayout({ children }: SettingsLayoutProps) {
+export default async function AppLayout({ children }: SettingsLayoutProps) {
+  const session = await auth()
+  if (!session?.user) {
+    redirect('/auth/login')
+  }
+
   return (
     <>
       <SimpleNav />
