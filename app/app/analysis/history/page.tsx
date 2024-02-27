@@ -18,7 +18,7 @@ import { useSession } from 'next-auth/react'
 export default function AnalysisHistoryPage() {
   const { data: session } = useSession()
   const images = useQuery(api.satelliteImage.getImagesByUser, {
-    userId: session?.user.id ?? '',
+    userId: session?.user.email ?? '',
   })
 
   const deleteImage = useMutation(api.satelliteImage.deleteImage)

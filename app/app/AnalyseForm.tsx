@@ -64,7 +64,7 @@ export const AnalyseForm = () => {
     const imagePromise = performRetrieveSatelliteImage({
       longitude: values.lon,
       latitude: values.lat,
-      userId: session?.user.id ?? '',
+      userId: session?.user.email ?? '',
       timeRangeFrom: values.timeRangeFrom,
       timeRangeTo: values.timeRangeTo,
     })
@@ -96,7 +96,7 @@ export const AnalyseForm = () => {
     const imagePromise = performRetrieveSatelliteImage({
       longitude: form.getValues('lon'),
       latitude: form.getValues('lat'),
-      userId: session?.user.id ?? '',
+      userId: session?.user.email ?? '',
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
     })
