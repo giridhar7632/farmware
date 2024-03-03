@@ -23,7 +23,7 @@ export default function ProfileMenu({ name, email, image }: ProfileMenuProps) {
             <AvatarFallback>{getInitials(name ?? '')}</AvatarFallback>
           </Avatar>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="relative p-4">
           <div className="text-xs text-neutral-400">Logged in as:</div>
           <div className="mt-2 font-semibold">{name}</div>
           <div className="truncate text-neutral-500">{email}</div>

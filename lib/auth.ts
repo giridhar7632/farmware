@@ -26,17 +26,17 @@ export const authOptions: NextAuthConfig = {
     verifyRequest: '/auth/verify-request',
     error: '/auth/error',
   },
-  callbacks: {
-    async session({ session, user }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: user.id,
-        },
-      }
-    },
-  },
+  // callbacks: {
+  //   async session({ session, user }) {
+  //     return {
+  //       ...session,
+  //       user: {
+  //         ...session.user,
+  //         id: user.email,
+  //       },
+  //     }
+  //   },
+  // },
 }
 
 export const {
