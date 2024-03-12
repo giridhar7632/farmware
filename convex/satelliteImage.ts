@@ -75,7 +75,151 @@ export const saveImage = internalMutation({
   },
 })
 
-export const retrieveSatelliteImage: RegisteredAction<
+export const retrieveNDMISatelliteImage: RegisteredAction<
+  'public',
+  {
+    timeRangeFrom: string
+    timeRangeTo: string
+    latitude: string
+    longitude: string
+    userId: string
+  },
+  Promise<string | null | undefined>
+> = action({
+  args: {
+    latitude: v.string(),
+    longitude: v.string(),
+    userId: v.string(),
+    timeRangeFrom: v.string(),
+    timeRangeTo: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // const testArgs = {
+    //   latitude: '43.5639',
+    //   longitude: '-79.7172',
+    //   userId: 'user',
+    //   timeRangeFrom: '2022-05-01T00:00:00Z',
+    //   timeRangeTo: '2022-05-15T00:00:00Z',
+    // }
+
+    // const bbox = [-79.8172, 43.4639, -79.9172, 43.6639]
+    try {
+      const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
+        internal.satelliteImage.getImageByInfo,
+        {
+          timeRangeFrom: args.timeRangeFrom,
+          timeRangeTo: args.timeRangeTo,
+          latitude: args.latitude,
+          longitude: args.longitude,
+        },
+      )
+      if (existingImage) {
+        const imageUrl = await ctx.storage.getUrl(existingImage.image)
+        return imageUrl
+      }
+      const lat = parseFloat(args.latitude)
+      const long = parseFloat(args.longitude)
+      const bbox = [
+        +(long - 0.1).toFixed(4),
+        +(lat - 0.1).toFixed(4),
+        +(long + 0.1).toFixed(4),
+        +(lat + 0.1).toFixed(4),
+      ]
+
+      // // get token
+      const tokenRes = await fetch(
+        'https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: process.env.CLIENT_ID!,
+            client_secret: process.env.CLIENT_SECRET!,
+          }),
+        },
+      )
+      if (!tokenRes.ok) {
+        throw new Error(`Error: ${tokenRes.status} ${tokenRes.statusText}`)
+      }
+      const { access_token } = await tokenRes.json()
+
+      const res = await fetch(
+        'https://services.sentinel-hub.com/api/v1/process',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            input: {
+              bounds: {
+                properties: {
+                  crs: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84',
+                },
+                bbox,
+              },
+              data: [
+                {
+                  type: 'sentinel-2-l2a',
+                  dataFilter: {
+                    timeRange: {
+                      from: args.timeRangeFrom,
+                      to: args.timeRangeTo,
+                    },
+                  },
+                },
+              ],
+            },
+            output: {
+              width: 1080,
+              height: 1080,
+            },
+            evalscript: `
+        //VERSION=3
+        function setup() {
+          return {
+            input: ["B04", "B08", "B11"],
+            output: {
+              bands: 3,
+              sampleType: "AUTO"
+            }
+          }
+        }
+        function evaluatePixel(sample) {
+            let ndmi = (sample.B08 - sample.B11) / (sample.B08 + sample.B11);
+            if (ndmi <= -0.66) return [0.8, 0, 0];
+            else if (ndmi <= -0.33) return [1, 0.6, 0.6];
+            else if (ndmi <= 0) return [1, 0, 0];
+            else if (ndmi <= 0.33) return [0.6, 1, 0.6];
+            else if (ndmi <= 0.66) return [0, 0.8, 0];
+            else if (ndmi <= 1) return [0, 0.4, 0];
+        }`,
+          }),
+        },
+      )
+      const image = await res.blob()
+      const storageId: Id<'_storage'> = await ctx.storage.store(image)
+      await ctx.runMutation(internal.satelliteImage.saveImage, {
+        storageId,
+        userID: args.userId,
+        timeRangeFrom: args.timeRangeFrom,
+        timeRangeTo: args.timeRangeTo,
+        latitude: args.latitude,
+        longitude: args.longitude,
+      })
+      const imageUrl = await ctx.storage.getUrl(storageId)
+      return imageUrl
+    } catch (error) {
+      console.error(error)
+    }
+  },
+})
+
+export const retrieveRGBSatelliteImage: RegisteredAction<
   'public',
   {
     timeRangeFrom: string

@@ -41,8 +41,8 @@ const formSchema = z.object({
 export const AnalyseForm = () => {
   const { data: session } = useSession()
   const [loading, setLoading] = useState<boolean>(false)
-  const performRetrieveSatelliteImage = useAction(
-    api.satelliteImage.retrieveSatelliteImage,
+  const performNDMIRetrieveSatelliteImage = useAction(
+    api.satelliteImage.retrieveNDMISatelliteImage,
   )
   const [satelliteImage, setSatelliteImage] = useState('')
   const [isImageLoaded, setIsImageLoaded] = useState(false)
@@ -61,7 +61,7 @@ export const AnalyseForm = () => {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const imagePromise = performRetrieveSatelliteImage({
+    const imagePromise = performNDMIRetrieveSatelliteImage({
       longitude: values.lon,
       latitude: values.lat,
       userId: session?.user.email ?? '',
@@ -93,7 +93,7 @@ export const AnalyseForm = () => {
     form.setValue('timeRangeFrom', newTimeRangeFrom)
     form.setValue('timeRangeTo', newTimeRangeTo)
 
-    const imagePromise = performRetrieveSatelliteImage({
+    const imagePromise = performNDMIRetrieveSatelliteImage({
       longitude: form.getValues('lon'),
       latitude: form.getValues('lat'),
       userId: session?.user.email ?? '',
