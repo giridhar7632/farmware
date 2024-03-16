@@ -126,7 +126,7 @@ export const retrieveNDMISatelliteImage: RegisteredAction<
         +(lat + 0.1).toFixed(4),
       ]
 
-      // // get token
+      // get sentinel hub bearer token every time. it expires after 1 hour but we can refresh it every time for simplicity
       const tokenRes = await fetch(
         'https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token',
         {
@@ -270,7 +270,6 @@ export const retrieveRGBSatelliteImage: RegisteredAction<
         +(lat + 0.1).toFixed(4),
       ]
 
-      // // get token
       const tokenRes = await fetch(
         'https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token',
         {
@@ -326,7 +325,7 @@ export const retrieveRGBSatelliteImage: RegisteredAction<
         //VERSION=3
         function setup() {
           return {
-            input: ["B04", "B08", "B11"],
+            input: ["B02", "B03", "B04"],
             output: {
               bands: 3,
               sampleType: "AUTO"
@@ -334,13 +333,7 @@ export const retrieveRGBSatelliteImage: RegisteredAction<
           }
         }
         function evaluatePixel(sample) {
-            let ndmi = (sample.B08 - sample.B11) / (sample.B08 + sample.B11);
-            if (ndmi <= -0.66) return [0.8, 0, 0];
-            else if (ndmi <= -0.33) return [1, 0.6, 0.6];
-            else if (ndmi <= 0) return [1, 0, 0];
-            else if (ndmi <= 0.33) return [0.6, 1, 0.6];
-            else if (ndmi <= 0.66) return [0, 0.8, 0];
-            else if (ndmi <= 1) return [0, 0.4, 0];
+          return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]
         }`,
           }),
         },
