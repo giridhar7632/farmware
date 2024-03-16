@@ -1,11 +1,12 @@
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { getInitials } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import Link from 'next/link'
+import { SignOut } from '@/app/auth/Methods'
 
 type ProfileMenuProps = {
   name?: string | null | undefined
@@ -15,20 +16,20 @@ type ProfileMenuProps = {
 
 export default function ProfileMenu({ name, email, image }: ProfileMenuProps) {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Avatar>
-            <AvatarImage src={image ?? ''} alt={name ?? ''} />
-            <AvatarFallback>{getInitials(name ?? '')}</AvatarFallback>
-          </Avatar>
-        </TooltipTrigger>
-        <TooltipContent className="relative p-4">
+    <Popover>
+      <PopoverTrigger asChild>
+        <Avatar>
+          <AvatarImage src={image ?? ''} alt={name ?? ''} />
+          <AvatarFallback>{getInitials(name ?? '')}</AvatarFallback>
+        </Avatar>
+      </PopoverTrigger>
+      <PopoverContent className="relative p-4">
+        <Link href="/app/profile">
           <div className="text-xs text-neutral-400">Logged in as:</div>
           <div className="mt-2 font-semibold">{name}</div>
           <div className="truncate text-neutral-500">{email}</div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        </Link>
+      </PopoverContent>
+    </Popover>
   )
 }

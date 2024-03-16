@@ -28,13 +28,14 @@ export default async function AppLayout({ children }: SettingsLayoutProps) {
   if (!session?.user) {
     redirect('/auth/login')
   }
-
   return (
     <>
       <SimpleNav />
       <div className="space-y-6 p-10 pb-16">
         <div className="space-y-0.5">
-          <h2 className="text-2xl font-bold tracking-tight">Hi There!</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Hi {session?.user.name?.split(' ')[0]}!
+          </h2>
           <p className="text-muted-foreground">
             Welcome to the Dashboard. Here you can view your analysis, history
             and profile.
@@ -45,7 +46,7 @@ export default async function AppLayout({ children }: SettingsLayoutProps) {
           <aside>
             <SidebarNav items={sidebarNavItems} />
           </aside>
-          <div className="flex-1 lg:max-w-2xl">{children}</div>
+          <div className="flex-1 lg:max-w-4xl">{children}</div>
         </div>
       </div>
     </>
