@@ -1,7 +1,6 @@
 import '@/app/globals.css'
 
 import { Roboto } from 'next/font/google'
-import Script from 'next/script'
 import type { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
@@ -66,7 +65,6 @@ export default async function RootLayout({
             <ConvexClientProvider>{children}</ConvexClientProvider>
             <Toaster />
           </ThemeProvider>
-          <Script src="bower_components/aos/dist/aos.js" />
         </body>
       </html>
     </SessionProvider>

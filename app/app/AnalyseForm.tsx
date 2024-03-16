@@ -196,7 +196,10 @@ export const AnalyseForm = () => {
             From {form.getValues('timeRangeFrom').split('T')[0]} to{' '}
             {form.getValues('timeRangeTo').split('T')[0]}
           </p>
-          <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
+          <Button
+            className="bg-blue-500 hover:bg-blue-600 dark:text-white"
+            type="submit"
+          >
             Analyse
           </Button>
         </form>
