@@ -248,19 +248,19 @@ export const retrieveRGBSatelliteImage: RegisteredAction<
 
     // const bbox = [-79.8172, 43.4639, -79.9172, 43.6639]
     try {
-      const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
-        internal.satelliteImage.getImageByInfo,
-        {
-          timeRangeFrom: args.timeRangeFrom,
-          timeRangeTo: args.timeRangeTo,
-          latitude: args.latitude,
-          longitude: args.longitude,
-        },
-      )
-      if (existingImage) {
-        const imageUrl = await ctx.storage.getUrl(existingImage.image)
-        return imageUrl
-      }
+      // const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
+      //   internal.satelliteImage.getImageByInfo,
+      //   {
+      //     timeRangeFrom: args.timeRangeFrom,
+      //     timeRangeTo: args.timeRangeTo,
+      //     latitude: args.latitude,
+      //     longitude: args.longitude,
+      //   },
+      // )
+      // if (existingImage) {
+      //   const imageUrl = await ctx.storage.getUrl(existingImage.image)
+      //   return imageUrl
+      // }
       const lat = parseFloat(args.latitude)
       const long = parseFloat(args.longitude)
       const bbox = [
