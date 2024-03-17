@@ -257,7 +257,7 @@ export const AnalyseForm = () => {
               src={RGBsatelliteImage}
               height={500}
               width={500}
-              className="rounded-sm"
+              className="rounded-sm border"
               alt="RGB satellite image for requested location"
             />
             <Image
@@ -265,7 +265,7 @@ export const AnalyseForm = () => {
               src={NDMIsatelliteImage}
               height={500}
               width={500}
-              className="rounded-sm"
+              className="rounded-sm border"
               alt="NDMI satellite image for requested location"
             />
             <div className="flex gap-4 md:flex-col">

@@ -46,7 +46,7 @@ export default async function AppLayout({ children }: SettingsLayoutProps) {
           <aside>
             <SidebarNav items={sidebarNavItems} />
           </aside>
-          <div className="flex-1 lg:max-w-4xl">{children}</div>
+          <div className="flex-1 lg:max-w-6xl">{children}</div>
         </div>
       </div>
     </>

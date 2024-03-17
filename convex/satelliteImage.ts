@@ -129,10 +129,10 @@ export const retrieveNDMISatelliteImage: RegisteredAction<
       const lat = parseFloat(args.latitude)
       const long = parseFloat(args.longitude)
       const bbox = [
-        +(long - 0.1).toFixed(4),
-        +(lat - 0.1).toFixed(4),
-        +(long + 0.1).toFixed(4),
-        +(lat + 0.1).toFixed(4),
+        +(long - 0.0001),
+        +(lat - 0.0001),
+        +(long + 0.0001),
+        +(lat + 0.0001),
       ]
 
       // get sentinel hub bearer token every time. it expires after 1 hour so we can refresh it every time for simplicity
@@ -227,7 +227,6 @@ export const retrieveNDMISatelliteImage: RegisteredAction<
 
       const imageUrl = await ctx.storage.getUrl(storageId)
       return imageUrl
-      
     } catch (error) {
       console.error(error)
     }
@@ -373,9 +372,8 @@ export const retrieveRGBSatelliteImage: RegisteredAction<
 
       const imageUrl = await ctx.storage.getUrl(storageId)
       return imageUrl
-
     } catch (error) {
-      console.error("Some error when retrieving rgb image:", error)
+      console.error('Some error when retrieving rgb image:', error)
     }
   },
 })
