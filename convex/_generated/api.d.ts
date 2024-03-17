@@ -15,6 +15,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as satelliteImage from "../satelliteImage.js";
+import type * as saveUserData from "../saveUserData.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -26,6 +27,7 @@ import type * as satelliteImage from "../satelliteImage.js";
  */
 declare const fullApi: ApiFromModules<{
   satelliteImage: typeof satelliteImage;
+  saveUserData: typeof saveUserData;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

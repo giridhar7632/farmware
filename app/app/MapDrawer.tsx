@@ -11,6 +11,17 @@ import {
   useMapEvents,
   Popup,
 } from 'react-leaflet'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
+import { Button } from '@/components/ui/button'
 import 'leaflet/dist/leaflet.css'
 import * as L from 'leaflet'
 import { debounce } from 'lodash'
@@ -22,8 +33,8 @@ interface MapComponentProps {
   setValue: UseFormSetValue<{
     lat: number
     lon: number
-    timeRangeFrom: string
-    timeRangeTo: string
+    timeRangeFrom: Date
+    timeRangeTo: Date
   }>
 }
 
@@ -94,7 +105,7 @@ function DraggableMarker({
   )
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({
+const MapDrawer: React.FC<MapComponentProps> = ({
   initialPosition = [51.505, -0.09],
   setValue,
 }) => {
@@ -130,30 +141,52 @@ const MapComponent: React.FC<MapComponentProps> = ({
   }, 500)
 
   return (
-    <div className="w-full space-y-2">
-      <Input
-        type="text"
-        placeholder="Search places..."
-        onChange={(e) => handleSearch(e.target.value)}
-      />
-      <MapContainer
-        center={initialPosition}
-        zoom={18}
-        ref={mapRef}
-        style={{ height: '400px', width: '100%', borderRadius: 12 }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <DraggableMarker
-          initialPosition={markerPosition ?? initialPosition}
-          setMarkerPosition={setMarkerPosition}
-          setValue={setValue}
-        />{' '}
-      </MapContainer>
-    </div>
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button variant={'secondary'}>Open map</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-4xl">
+          <DrawerHeader>
+            <DrawerTitle>Pick your farm location</DrawerTitle>
+            <DrawerDescription>
+              You can also use the search option to find surrounding famous
+              places.
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div data-vaul-no-drag className="space-y-2 p-4 pb-0">
+            <Input
+              type="text"
+              placeholder="Search places..."
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+            <MapContainer
+              center={initialPosition}
+              zoom={18}
+              ref={mapRef}
+              style={{ height: '400px', width: '100%', borderRadius: 12 }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <DraggableMarker
+                initialPosition={markerPosition ?? initialPosition}
+                setMarkerPosition={setMarkerPosition}
+                setValue={setValue}
+              />{' '}
+            </MapContainer>
+          </div>
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button>Select location</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
-export default MapComponent
+export default MapDrawer

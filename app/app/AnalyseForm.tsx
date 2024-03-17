@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAction } from 'convex/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -29,19 +29,20 @@ import { api } from '@/convex/_generated/api'
 import { addDays, isDateInFuture } from '@/lib/date'
 import { Loader2Icon, LocateIcon } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import MapComponent from './Map'
+import MapDrawer from './MapDrawer'
 import Image from 'next/image'
+import DatePicker from '@/components/ui/date-picker'
 
 const formSchema = z.object({
   lat: z.number().max(180),
   lon: z.number().max(180),
-  timeRangeFrom: z.string(),
-  timeRangeTo: z.string(),
+  timeRangeFrom: z.date(),
+  timeRangeTo: z.date(),
 })
 
 export const AnalyseForm = () => {
   const { data: session } = useSession()
-  const [loading, setLoading] = useState<boolean>(false)
+  const [locating, setLocating] = useState<boolean>(false)
 
   // NDMI image
   const performNDMIRetrieveSatelliteImage = useAction(
@@ -62,19 +63,28 @@ export const AnalyseForm = () => {
     defaultValues: {
       lat: 51.505,
       lon: -0.09,
-      timeRangeFrom: '2024-01-01T00:00:00Z',
-      timeRangeTo: '2024-01-06T00:00:00Z',
+      timeRangeFrom: new Date('2024-01-01T00:00:00Z'),
+      timeRangeTo: new Date('2024-01-06T00:00:00Z'),
     },
   })
+  const timeRangeFrom = form.watch('timeRangeFrom')
+
+  useEffect(() => {
+    if (timeRangeFrom) {
+      const date = new Date(timeRangeFrom)
+      date.setDate(date.getDate() + 5)
+      form.setValue('timeRangeTo', date)
+    }
+  }, [timeRangeFrom])
 
   if (session?.user === undefined) {
     return <Loader2Icon className="animate-spin" />
   }
 
   // Wrapper function to handle form submission
-  const handleFormSubmit = (e: any) => {
-    onSubmit(0, e);
-  };
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    await onSubmit(0, values)
+  }
 
   async function onSubmit(days: number, values?: z.infer<typeof formSchema>) {
     const newTimeRangeFrom = addDays(form.getValues('timeRangeFrom'), days)
@@ -88,34 +98,32 @@ export const AnalyseForm = () => {
       longitude: form.getValues('lon').toString(),
       latitude: form.getValues('lat').toString(),
       userId: session?.user.email ?? '',
-      timeRangeFrom: newTimeRangeFrom,
-      timeRangeTo: newTimeRangeTo,
+      timeRangeFrom: newTimeRangeFrom.toISOString(),
+      timeRangeTo: newTimeRangeTo.toISOString(),
     })
     const RGBImagePromise = performRGBRetrieveSatelliteImage({
       type: 'RGB',
       longitude: form.getValues('lon').toString(),
       latitude: form.getValues('lat').toString(),
       userId: session?.user.email ?? '',
-      timeRangeFrom: newTimeRangeFrom,
-      timeRangeTo: newTimeRangeTo,
+      timeRangeFrom: newTimeRangeFrom.toISOString(),
+      timeRangeTo: newTimeRangeTo.toISOString(),
     })
 
-    const bothImagePromises = Promise.all([
-      NDMIImagePromise,
-      RGBImagePromise
-    ]).then((imageUrl) => {
-      console.log('All promises resolved:', imageUrl);
-      if (imageUrl[0] && imageUrl[1]) {
-        setNDMISatelliteImage(imageUrl[0])
-        setRGBSatelliteImage(imageUrl[1])
-        return imageUrl
-      } else {
-        throw new Error('No image URL returned')
-      }
-    })
+    const bothImagePromises = Promise.all([NDMIImagePromise, RGBImagePromise])
+      .then((imageUrl) => {
+        console.log('All promises resolved:', imageUrl)
+        if (imageUrl[0] && imageUrl[1]) {
+          setNDMISatelliteImage(imageUrl[0])
+          setRGBSatelliteImage(imageUrl[1])
+          return imageUrl
+        } else {
+          throw new Error('No image URL returned')
+        }
+      })
       .catch((error: Error) => {
-        console.error('An error occurred:', error);
-      });
+        console.error('An error occurred:', error)
+      })
 
     toast.promise(bothImagePromises, {
       loading: 'Retrieving new image...',
@@ -125,16 +133,16 @@ export const AnalyseForm = () => {
   }
 
   function onLocate() {
-    setLoading(true)
+    setLocating(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         form.setValue('lat', Number(pos.coords.latitude.toFixed(4)))
         form.setValue('lon', Number(pos.coords.longitude.toFixed(4)))
-        setLoading(false)
+        setLocating(false)
       },
       (error) => {
         console.error(error)
-        setLoading(false)
+        setLocating(false)
         toast.error('Failed to get location!')
       },
     )
@@ -143,7 +151,10 @@ export const AnalyseForm = () => {
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+        <form
+          onSubmit={form.handleSubmit(handleFormSubmit)}
+          className="space-y-4"
+        >
           <Label>Enter the coordinates of your farm.</Label>
           <div className="flex items-center gap-2">
             <FormField
@@ -178,7 +189,7 @@ export const AnalyseForm = () => {
                     variant={'secondary'}
                     onClick={onLocate}
                   >
-                    {loading ? (
+                    {locating ? (
                       <Loader2Icon className="animate-spin" />
                     ) : (
                       <LocateIcon />
@@ -190,17 +201,44 @@ export const AnalyseForm = () => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-          <div className="h-92 w-full">
-            <MapComponent
+            <MapDrawer
               initialPosition={[form.getValues('lat'), form.getValues('lon')]}
               setValue={form.setValue}
             />
           </div>
-          <p className="text-sm italic">
-            From {form.getValues('timeRangeFrom').split('T')[0]} to{' '}
-            {form.getValues('timeRangeTo').split('T')[0]}
-          </p>
+
+          <div className="relative flex items-center gap-3 text-sm italic">
+            From{' '}
+            <FormField
+              control={form.control}
+              name="timeRangeFrom"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <DatePicker
+                      value={new Date(field.value)}
+                      onChangeHandler={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            to{' '}
+            <FormField
+              control={form.control}
+              name="timeRangeTo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <DatePicker value={new Date(field.value)} disabled={true} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <Button
             className="bg-blue-500 hover:bg-blue-600 dark:text-white"
             type="submit"
