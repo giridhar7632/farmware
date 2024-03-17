@@ -70,33 +70,6 @@ export const AnalyseForm = () => {
     return <Loader2Icon className="animate-spin" />
   }
 
-  // async function onSubmit(values: z.infer<typeof formSchema>) {
-  //   const imagePromise = performNDMIRetrieveSatelliteImage({
-  //     type: 'NDMI',
-  //     longitude: values.lon,
-  //     latitude: values.lat,
-  //     userId: session?.user.email ?? '',
-  //     timeRangeFrom: values.timeRangeFrom,
-  //     timeRangeTo: values.timeRangeTo,
-  //   })
-  //     .then((imageUrl: string | null) => {
-  //       if (imageUrl) {
-  //         setNDMISatelliteImage(imageUrl)
-  //         return imageUrl
-  //       } else {
-  //         throw new Error('No image URL returned')
-  //       }
-  //     })
-  //     .catch((error: Error) => {
-  //       throw new Error(error.message)
-  //     })
-  //   toast.promise(imagePromise, {
-  //     loading: 'Analyzing...',
-  //     success: 'Analysis successful.',
-  //     error: 'Error fetching image. Please try again later or contact admin',
-  //   })
-  // }
-
   // Wrapper function to handle form submission
   const handleFormSubmit = (e: any) => {
     onSubmit(0, e);
@@ -125,19 +98,6 @@ export const AnalyseForm = () => {
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
     })
-
-    // .then((imageUrl: string | null) => {
-    //   if (imageUrl) {
-    //     setNDMISatelliteImage(imageUrl)
-    //     return imageUrl
-    //   } else {
-    //     throw new Error('No image URL returned')
-    //   }
-    // })
-    // .catch((error: Error) => {
-    //   throw new Error(error.message)
-    // })
-
 
     const bothImagePromises = Promise.all([
       NDMIImagePromise,

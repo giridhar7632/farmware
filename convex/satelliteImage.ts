@@ -135,7 +135,7 @@ export const retrieveNDMISatelliteImage: RegisteredAction<
         +(lat + 0.1).toFixed(4),
       ]
 
-      // get sentinel hub bearer token every time. it expires after 1 hour but we can refresh it every time for simplicity
+      // get sentinel hub bearer token every time. it expires after 1 hour so we can refresh it every time for simplicity
       const tokenRes = await fetch(
         'https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token',
         {
@@ -264,20 +264,20 @@ export const retrieveRGBSatelliteImage: RegisteredAction<
 
     // const bbox = [-79.8172, 43.4639, -79.9172, 43.6639]
     try {
-      // const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
-      //   internal.satelliteImage.getImageByInfo,
-      //   {
-      //     type: 'RGB',
-      //     timeRangeFrom: args.timeRangeFrom,
-      //     timeRangeTo: args.timeRangeTo,
-      //     latitude: args.latitude,
-      //     longitude: args.longitude,
-      //   },
-      // )
-      // if (existingImage) {
-      //   const imageUrl = await ctx.storage.getUrl(existingImage.image)
-      //   return imageUrl
-      // }
+      const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
+        internal.satelliteImage.getImageByInfo,
+        {
+          type: 'RGB',
+          timeRangeFrom: args.timeRangeFrom,
+          timeRangeTo: args.timeRangeTo,
+          latitude: args.latitude,
+          longitude: args.longitude,
+        },
+      )
+      if (existingImage) {
+        const imageUrl = await ctx.storage.getUrl(existingImage.image)
+        return imageUrl
+      }
       const lat = parseFloat(args.latitude)
       const long = parseFloat(args.longitude)
       const bbox = [
