@@ -1,4 +1,7 @@
+import { type RegisteredAction } from 'convex/server'
 import { v } from 'convex/values'
+import { internal } from './_generated/api'
+import { type Doc, type Id } from './_generated/dataModel'
 import {
   action,
   internalMutation,
@@ -6,9 +9,6 @@ import {
   mutation,
   query,
 } from './_generated/server'
-import { type Doc, type Id } from './_generated/dataModel'
-import { internal } from './_generated/api'
-import { type RegisteredAction } from 'convex/server'
 
 export const getImagesByUser = query({
   args: { userId: v.string() },
@@ -36,6 +36,7 @@ export const deleteImage = mutation({
 
 export const getImageByInfo = internalQuery({
   args: {
+    type: v.string(),
     timeRangeFrom: v.string(),
     timeRangeTo: v.string(),
     latitude: v.string(),
@@ -45,6 +46,7 @@ export const getImageByInfo = internalQuery({
     // use `args` and/or `ctx.auth` to authorize the user
     const image = await ctx.db
       .query('satellite_images')
+      .filter((q) => q.eq(q.field('type'), args.type))
       .filter((q) => q.eq(q.field('latitude'), args.latitude))
       .filter((q) => q.eq(q.field('longitude'), args.longitude))
       .filter((q) => q.eq(q.field('timeRangeFrom'), args.timeRangeFrom))
@@ -57,6 +59,7 @@ export const getImageByInfo = internalQuery({
 export const saveImage = internalMutation({
   args: {
     userID: v.string(),
+    type: v.string(),
     timeRangeFrom: v.string(),
     timeRangeTo: v.string(),
     storageId: v.id('_storage'),
@@ -66,6 +69,7 @@ export const saveImage = internalMutation({
   handler: async (ctx, args) => {
     await ctx.db.insert('satellite_images', {
       userID: args.userID,
+      type: args.type,
       timeRangeFrom: args.timeRangeFrom,
       timeRangeTo: args.timeRangeTo,
       image: args.storageId,
@@ -75,9 +79,10 @@ export const saveImage = internalMutation({
   },
 })
 
-export const retrieveSatelliteImage: RegisteredAction<
+export const retrieveNDMISatelliteImage: RegisteredAction<
   'public',
   {
+    type: string
     timeRangeFrom: string
     timeRangeTo: string
     latitude: string
@@ -87,6 +92,7 @@ export const retrieveSatelliteImage: RegisteredAction<
   Promise<string | null | undefined>
 > = action({
   args: {
+    type: v.string(),
     latitude: v.string(),
     longitude: v.string(),
     userId: v.string(),
@@ -95,6 +101,7 @@ export const retrieveSatelliteImage: RegisteredAction<
   },
   handler: async (ctx, args) => {
     // const testArgs = {
+    //   type: 'NDMI',
     //   latitude: '43.5639',
     //   longitude: '-79.7172',
     //   userId: 'user',
@@ -104,9 +111,11 @@ export const retrieveSatelliteImage: RegisteredAction<
 
     // const bbox = [-79.8172, 43.4639, -79.9172, 43.6639]
     try {
+      console.log(args)
       const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
         internal.satelliteImage.getImageByInfo,
         {
+          type: 'NDMI',
           timeRangeFrom: args.timeRangeFrom,
           timeRangeTo: args.timeRangeTo,
           latitude: args.latitude,
@@ -126,7 +135,7 @@ export const retrieveSatelliteImage: RegisteredAction<
         +(lat + 0.1).toFixed(4),
       ]
 
-      // // get token
+      // get sentinel hub bearer token every time. it expires after 1 hour so we can refresh it every time for simplicity
       const tokenRes = await fetch(
         'https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token',
         {
@@ -205,18 +214,168 @@ export const retrieveSatelliteImage: RegisteredAction<
       )
       const image = await res.blob()
       const storageId: Id<'_storage'> = await ctx.storage.store(image)
+
       await ctx.runMutation(internal.satelliteImage.saveImage, {
         storageId,
         userID: args.userId,
+        type: 'NDMI',
         timeRangeFrom: args.timeRangeFrom,
         timeRangeTo: args.timeRangeTo,
         latitude: args.latitude,
         longitude: args.longitude,
       })
+
       const imageUrl = await ctx.storage.getUrl(storageId)
       return imageUrl
+      
     } catch (error) {
       console.error(error)
+    }
+  },
+})
+
+export const retrieveRGBSatelliteImage: RegisteredAction<
+  'public',
+  {
+    type: string
+    timeRangeFrom: string
+    timeRangeTo: string
+    latitude: string
+    longitude: string
+    userId: string
+  },
+  Promise<string | null | undefined>
+> = action({
+  args: {
+    type: v.string(),
+    latitude: v.string(),
+    longitude: v.string(),
+    userId: v.string(),
+    timeRangeFrom: v.string(),
+    timeRangeTo: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // const testArgs = {
+    //   type: 'RGB',
+    //   latitude: '43.5639',
+    //   longitude: '-79.7172',
+    //   userId: 'user',
+    //   timeRangeFrom: '2022-05-01T00:00:00Z',
+    //   timeRangeTo: '2022-05-15T00:00:00Z',
+    // }
+
+    // const bbox = [-79.8172, 43.4639, -79.9172, 43.6639]
+    try {
+      const existingImage: Doc<'satellite_images'> | null = await ctx.runQuery(
+        internal.satelliteImage.getImageByInfo,
+        {
+          type: 'RGB',
+          timeRangeFrom: args.timeRangeFrom,
+          timeRangeTo: args.timeRangeTo,
+          latitude: args.latitude,
+          longitude: args.longitude,
+        },
+      )
+      if (existingImage) {
+        const imageUrl = await ctx.storage.getUrl(existingImage.image)
+        return imageUrl
+      }
+      const lat = parseFloat(args.latitude)
+      const long = parseFloat(args.longitude)
+      const bbox = [
+        +(long - 0.1).toFixed(4),
+        +(lat - 0.1).toFixed(4),
+        +(long + 0.1).toFixed(4),
+        +(lat + 0.1).toFixed(4),
+      ]
+
+      const tokenRes = await fetch(
+        'https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: process.env.CLIENT_ID!,
+            client_secret: process.env.CLIENT_SECRET!,
+          }),
+        },
+      )
+      if (!tokenRes.ok) {
+        throw new Error(`Error: ${tokenRes.status} ${tokenRes.statusText}`)
+      }
+      const { access_token } = await tokenRes.json()
+
+      const res = await fetch(
+        'https://services.sentinel-hub.com/api/v1/process',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            input: {
+              bounds: {
+                properties: {
+                  crs: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84',
+                },
+                bbox,
+              },
+              data: [
+                {
+                  type: 'sentinel-2-l2a',
+                  dataFilter: {
+                    timeRange: {
+                      from: args.timeRangeFrom,
+                      to: args.timeRangeTo,
+                    },
+                  },
+                },
+              ],
+            },
+            output: {
+              width: 1080,
+              height: 1080,
+            },
+            evalscript: `
+              //VERSION=3
+              function setup() {
+                return {
+                  input: ["B02", "B03", "B04"],
+                  output: {
+                    bands: 3,
+                    sampleType: "AUTO" // default value - scales the output values from [0,1] to [0,255].
+                  }
+                }
+              }
+              
+              function evaluatePixel(sample) {
+                return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]
+              }`,
+          }),
+        },
+      )
+      const image = await res.blob()
+      const storageId: Id<'_storage'> = await ctx.storage.store(image)
+
+      await ctx.runMutation(internal.satelliteImage.saveImage, {
+        storageId,
+        userID: args.userId,
+        type: args.type,
+        timeRangeFrom: args.timeRangeFrom,
+        timeRangeTo: args.timeRangeTo,
+        latitude: args.latitude,
+        longitude: args.longitude,
+      })
+
+      const imageUrl = await ctx.storage.getUrl(storageId)
+      return imageUrl
+
+    } catch (error) {
+      console.error("Some error when retrieving rgb image:", error)
     }
   },
 })

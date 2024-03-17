@@ -1,11 +1,11 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { useState } from 'react'
-import { z } from 'zod'
-import { toast } from 'sonner'
 import { useAction } from 'convex/react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -15,22 +15,22 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Skeleton } from '@/components/ui/skeleton'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2Icon, LocateIcon } from 'lucide-react'
 import { api } from '@/convex/_generated/api'
-import Image from 'next/image'
 import { addDays, isDateInFuture } from '@/lib/date'
+import { Loader2Icon, LocateIcon } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import MapComponent from './Map'
+import Image from 'next/image'
 
 const formSchema = z.object({
   lat: z.number().max(180),
@@ -42,11 +42,21 @@ const formSchema = z.object({
 export const AnalyseForm = () => {
   const { data: session } = useSession()
   const [loading, setLoading] = useState<boolean>(false)
-  const performRetrieveSatelliteImage = useAction(
-    api.satelliteImage.retrieveSatelliteImage,
+
+  // NDMI image
+  const performNDMIRetrieveSatelliteImage = useAction(
+    api.satelliteImage.retrieveNDMISatelliteImage,
   )
-  const [satelliteImage, setSatelliteImage] = useState('')
-  const [isImageLoaded, setIsImageLoaded] = useState(false)
+  const [NDMIsatelliteImage, setNDMISatelliteImage] = useState('')
+  const [isNDMIImageLoaded, setIsNDMIImageLoaded] = useState(false)
+
+  // RGB image
+  const performRGBRetrieveSatelliteImage = useAction(
+    api.satelliteImage.retrieveRGBSatelliteImage,
+  )
+  const [RGBsatelliteImage, setRGBSatelliteImage] = useState('')
+  const [isRGBImageLoaded, setIsRGBImageLoaded] = useState(false)
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,61 +71,56 @@ export const AnalyseForm = () => {
     return <Loader2Icon className="animate-spin" />
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const imagePromise = performRetrieveSatelliteImage({
-      longitude: values.lon.toString(),
-      latitude: values.lat.toString(),
-      userId: session?.user.email ?? '',
-      timeRangeFrom: values.timeRangeFrom,
-      timeRangeTo: values.timeRangeTo,
-    })
-      .then((imageUrl: string | null) => {
-        if (imageUrl) {
-          setSatelliteImage(imageUrl)
-          return imageUrl
-        } else {
-          throw new Error('No image URL returned')
-        }
-      })
-      .catch((error: Error) => {
-        throw new Error(error.message)
-      })
-    toast.promise(imagePromise, {
-      loading: 'Analyzing...',
-      success: 'Analysis successful.',
-      error: 'Error fetching image. Please try again later or contact admin',
-    })
-  }
+  // Wrapper function to handle form submission
+  const handleFormSubmit = (e: any) => {
+    onSubmit(0, e);
+  };
 
-  async function handleFetchDiffDate(days: number) {
+  async function onSubmit(days: number, values?: z.infer<typeof formSchema>) {
     const newTimeRangeFrom = addDays(form.getValues('timeRangeFrom'), days)
     const newTimeRangeTo = addDays(form.getValues('timeRangeTo'), days)
 
     form.setValue('timeRangeFrom', newTimeRangeFrom)
     form.setValue('timeRangeTo', newTimeRangeTo)
 
-    const imagePromise = performRetrieveSatelliteImage({
+    const NDMIImagePromise = performNDMIRetrieveSatelliteImage({
+      type: 'NDMI',
       longitude: form.getValues('lon').toString(),
       latitude: form.getValues('lat').toString(),
       userId: session?.user.email ?? '',
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
     })
-      .then((imageUrl: string | null) => {
-        if (imageUrl) {
-          setSatelliteImage(imageUrl)
-          return imageUrl
-        } else {
-          throw new Error('No image URL returned')
-        }
-      })
+    const RGBImagePromise = performRGBRetrieveSatelliteImage({
+      type: 'RGB',
+      longitude: form.getValues('lon').toString(),
+      latitude: form.getValues('lat').toString(),
+      userId: session?.user.email ?? '',
+      timeRangeFrom: newTimeRangeFrom,
+      timeRangeTo: newTimeRangeTo,
+    })
+
+    const bothImagePromises = Promise.all([
+      NDMIImagePromise,
+      RGBImagePromise
+    ]).then((imageUrl) => {
+      console.log('All promises resolved:', imageUrl);
+      if (imageUrl[0] && imageUrl[1]) {
+        setNDMISatelliteImage(imageUrl[0])
+        setRGBSatelliteImage(imageUrl[1])
+        return imageUrl
+      } else {
+        throw new Error('No image URL returned')
+      }
+    })
       .catch((error: Error) => {
-        throw new Error(error.message)
-      })
-    toast.promise(imagePromise, {
+        console.error('An error occurred:', error);
+      });
+
+    toast.promise(bothImagePromises, {
       loading: 'Retrieving new image...',
       success: 'Analysis successful.',
-      error: 'Error fetching image. Please try again later or contact admin',
+      error: 'Error fetching images. Please try again later or contact admin',
     })
   }
 
@@ -138,7 +143,7 @@ export const AnalyseForm = () => {
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
           <Label>Enter the coordinates of your farm.</Label>
           <div className="flex items-center gap-2">
             <FormField
@@ -205,30 +210,36 @@ export const AnalyseForm = () => {
         </form>
       </Form>
 
-      {satelliteImage && (
+      {NDMIsatelliteImage && RGBsatelliteImage && (
         <div>
-          {!isImageLoaded && <Skeleton className="h-[500px] w-[500px]" />}
+          {!isNDMIImageLoaded && <Skeleton className="h-[500px] w-[500px]" />}
           <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
             <Image
-              onLoad={() => setIsImageLoaded(true)}
-              src={satelliteImage}
+              onLoad={() => setIsRGBImageLoaded(true)}
+              src={RGBsatelliteImage}
               height={500}
               width={500}
               className="rounded-sm"
-              alt="satellite image for requested location"
+              alt="RGB satellite image for requested location"
             />
-            {isImageLoaded && (
-              <div className="flex gap-4 md:flex-col">
-                <Button onClick={() => handleFetchDiffDate(-5)}>
-                  &lt;&lt; 5 days earlier
+            <Image
+              onLoad={() => setIsNDMIImageLoaded(true)}
+              src={NDMIsatelliteImage}
+              height={500}
+              width={500}
+              className="rounded-sm"
+              alt="NDMI satellite image for requested location"
+            />
+            <div className="flex gap-4 md:flex-col">
+              <Button onClick={() => onSubmit(-5)}>
+                &lt;&lt; 5 days earlier
+              </Button>
+              {!isDateInFuture(form.getValues('timeRangeTo')) && (
+                <Button onClick={() => onSubmit(5)}>
+                  &gt;&gt; 5 days later
                 </Button>
-                {!isDateInFuture(form.getValues('timeRangeTo')) && (
-                  <Button onClick={() => handleFetchDiffDate(5)}>
-                    &gt;&gt; 5 days later
-                  </Button>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

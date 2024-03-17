@@ -1,5 +1,7 @@
 export function addDays(date: string, days: number) {
   const result = new Date(date)
+  // subtract 7 months form the date
+  result.setMonth(result.getMonth() - 7)
   result.setDate(result.getDate() + days)
   return result.toISOString()
 }
