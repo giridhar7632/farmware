@@ -22,12 +22,12 @@ export default function Home() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-black tracking-tight sm:text-5xl xl:text-6xl/none">
-                    The complete analysis of your farm
+                    The moisture analysis of your farm
                   </h1>
                   <p className="max-w-[600px] text-neutral-500 dark:text-neutral-400 md:text-xl">
-                    Farmware can analyse your farm for the soil moisture,
-                    nutrients and get recommended about the high yeilding crops
-                    all by satellite images
+                    Farmware can analyse your farm for the soil moisture, and
+                    get recommend about the high yeilding crops all using
+                    satellite images
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">

@@ -16,13 +16,13 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   metadataBase: new URL('https://farmware-xi.vercel.app'),
   title: {
-    default: 'Farmware | The complete analysis of your farm',
+    default: 'Farmware | The moisture analysis of your farm',
     template: '%s | Farmware',
   },
-  description: 'The complete analysis of your farm.',
+  description: 'The moisture analysis of your farm.',
   openGraph: {
     title: 'Farmware',
-    description: 'The complete analysis of your farm.',
+    description: 'The moisture analysis of your farm.',
     url: 'https://farmware-xi.vercel.app',
     siteName: 'Farmware',
     locale: 'en_US',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: 'Farmware | The complete analysis of your farm',
+    title: 'Farmware | The moisture analysis of your farm',
     card: 'summary_large_image',
   },
 }
