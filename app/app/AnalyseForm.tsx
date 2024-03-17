@@ -86,8 +86,7 @@ export const AnalyseForm = () => {
     const NDMIImagePromise = performNDMIRetrieveSatelliteImage({
       type: 'NDMI',
       longitude: form.getValues('lon').toString(),
-      // @ts-expect-error weird
-      latitude: form.getValues('lat').toString,
+      latitude: form.getValues('lat').toString(),
       userId: session?.user.email ?? '',
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
@@ -95,7 +94,6 @@ export const AnalyseForm = () => {
     const RGBImagePromise = performRGBRetrieveSatelliteImage({
       type: 'RGB',
       longitude: form.getValues('lon').toString(),
-      // @ts-expect-error weird
       latitude: form.getValues('lat').toString(),
       userId: session?.user.email ?? '',
       timeRangeFrom: newTimeRangeFrom,
