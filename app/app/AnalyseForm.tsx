@@ -29,11 +29,12 @@ import { api } from '@/convex/_generated/api'
 import { addDays, isDateInFuture } from '@/lib/date'
 import { Loader2Icon, LocateIcon } from 'lucide-react'
 import { useSession } from 'next-auth/react'
+import MapComponent from './Map'
 import Image from 'next/image'
 
 const formSchema = z.object({
-  lat: z.string().max(10),
-  lon: z.string().max(10),
+  lat: z.number().max(180),
+  lon: z.number().max(180),
   timeRangeFrom: z.string(),
   timeRangeTo: z.string(),
 })
@@ -59,8 +60,8 @@ export const AnalyseForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      lat: '',
-      lon: '',
+      lat: 51.505,
+      lon: -0.09,
       timeRangeFrom: '2024-01-01T00:00:00Z',
       timeRangeTo: '2024-01-06T00:00:00Z',
     },
@@ -84,16 +85,18 @@ export const AnalyseForm = () => {
 
     const NDMIImagePromise = performNDMIRetrieveSatelliteImage({
       type: 'NDMI',
-      longitude: form.getValues('lon'),
-      latitude: form.getValues('lat'),
+      longitude: form.getValues('lon').toString(),
+      // @ts-expect-error weird
+      latitude: form.getValues('lat').toString,
       userId: session?.user.email ?? '',
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
     })
     const RGBImagePromise = performRGBRetrieveSatelliteImage({
       type: 'RGB',
-      longitude: form.getValues('lon'),
-      latitude: form.getValues('lat'),
+      longitude: form.getValues('lon').toString(),
+      // @ts-expect-error weird
+      latitude: form.getValues('lat').toString(),
       userId: session?.user.email ?? '',
       timeRangeFrom: newTimeRangeFrom,
       timeRangeTo: newTimeRangeTo,
@@ -127,10 +130,8 @@ export const AnalyseForm = () => {
     setLoading(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        form.setValue('lat', pos.coords.latitude.toFixed(4).toString())
-        form.setValue('lon', pos.coords.longitude.toFixed(4).toString())
-        form.setValue('lat', pos.coords.latitude.toFixed(4).toString())
-        form.setValue('lon', pos.coords.longitude.toFixed(4).toString())
+        form.setValue('lat', Number(pos.coords.latitude.toFixed(4)))
+        form.setValue('lon', Number(pos.coords.longitude.toFixed(4)))
         setLoading(false)
       },
       (error) => {
@@ -192,11 +193,20 @@ export const AnalyseForm = () => {
               </Tooltip>
             </TooltipProvider>
           </div>
+          <div className="h-92 w-full">
+            <MapComponent
+              initialPosition={[form.getValues('lat'), form.getValues('lon')]}
+              setValue={form.setValue}
+            />
+          </div>
           <p className="text-sm italic">
             From {form.getValues('timeRangeFrom').split('T')[0]} to{' '}
             {form.getValues('timeRangeTo').split('T')[0]}
           </p>
-          <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
+          <Button
+            className="bg-blue-500 hover:bg-blue-600 dark:text-white"
+            type="submit"
+          >
             Analyse
           </Button>
         </form>

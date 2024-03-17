@@ -8,7 +8,7 @@ export default async function AuthLayout({
   children: React.ReactNode
 }) {
   const session = await auth()
-  if (session?.user) redirect('/dashboard')
+  if (session?.user) redirect('/app')
   return (
     <>
       <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">

@@ -11,4 +11,8 @@ export default defineSchema({
     latitude: v.string(),
     longitude: v.string(),
   }),
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+  }),
 })

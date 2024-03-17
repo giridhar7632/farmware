@@ -151,7 +151,9 @@ export const retrieveNDMISatelliteImage: RegisteredAction<
         },
       )
       if (!tokenRes.ok) {
-        throw new Error(`Error: ${tokenRes.status} ${tokenRes.statusText}`)
+        throw new Error(
+          `Error in getting token: ${tokenRes.status} ${tokenRes.statusText}`,
+        )
       }
       const { access_token } = await tokenRes.json()
 

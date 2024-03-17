@@ -1,6 +1,11 @@
+import { SignOut } from '@/app/auth/Methods'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+import { auth } from '@/lib/auth'
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const session = await auth()
+
   return (
     <div className="space-y-6">
       <div>
@@ -10,6 +15,13 @@ export default function ProfilePage() {
         </p>
       </div>
       <Separator />
+      <Input name="name" type="text" value={session?.user?.name ?? 'No name'} />
+      <Input
+        name="email"
+        type="email"
+        value={session?.user?.email ?? 'email'}
+      />
+      <SignOut />
     </div>
   )
 }
