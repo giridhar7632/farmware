@@ -45,7 +45,7 @@ interface SearchResult {
 
 const iconOptions: L.IconOptions = {
   iconUrl: '/pin.png',
-  iconSize: [48, 48],
+  iconSize: [54, 54],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
 }
@@ -155,7 +155,7 @@ const MapDrawer: React.FC<MapComponentProps> = ({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div data-vaul-no-drag className="space-y-2 p-4 pb-0">
+          <div data-vaul-no-drag className="relative space-y-2 p-4 pb-0">
             <Input
               type="text"
               placeholder="Search places..."
@@ -165,7 +165,14 @@ const MapDrawer: React.FC<MapComponentProps> = ({
               center={initialPosition}
               zoom={18}
               ref={mapRef}
+              scrollWheelZoom={false}
+              id="map"
               style={{ height: '400px', width: '100%', borderRadius: 12 }}
+              whenReady={() => {
+                document
+                  .getElementById('map')
+                  ?.setAttribute('data-vaul-no-drag', 'true')
+              }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
