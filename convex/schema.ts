@@ -4,6 +4,7 @@ import { v } from 'convex/values'
 export default defineSchema({
   satellite_images: defineTable({
     userID: v.string(),
+    type: v.string(),
     timeRangeFrom: v.string(),
     timeRangeTo: v.string(),
     image: v.id('_storage'),
