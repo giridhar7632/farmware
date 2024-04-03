@@ -6,20 +6,6 @@ export default function Footer() {
       <p className="text-xs text-neutral-500 dark:text-neutral-400">
         © 2024 Farmware. All rights reserved.
       </p>
-      <nav className="flex gap-4 sm:ml-auto sm:gap-6">
-        <Link
-          className="text-xs underline-offset-4 hover:underline"
-          href="/terms"
-        >
-          Terms of Service
-        </Link>
-        <Link
-          className="text-xs underline-offset-4 hover:underline"
-          href="/policy"
-        >
-          Privacy
-        </Link>
-      </nav>
     </footer>
   )
 }
