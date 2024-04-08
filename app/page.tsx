@@ -22,7 +22,7 @@ export default function Home() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-black tracking-tight sm:text-5xl xl:text-6xl/none">
-                    Analyze your farm's moisture levels
+                    {"Analyze your farm's moisture levels"}
                   </h1>
                   <p className="max-w-[600px] text-neutral-500 dark:text-neutral-400 md:text-xl">
                     See soil moisture readings using the latest satellite imagery.
