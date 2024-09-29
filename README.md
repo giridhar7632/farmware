@@ -8,6 +8,8 @@
 
 ✨ Video demo: [Presentation](https://devpost.com/software/farmware-omy1wa)
 
+Note: Website is nonfunctional as the [European Satellite Agency API free trial](https://www.sentinel-hub.com/develop/api/) only lasts 1 month per account. 
+
 ## Tech stack ⚒️
 
 - Backend: Convex
